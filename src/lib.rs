@@ -35,26 +35,24 @@
 //! You can parse IRC messages using the provided `parse` function.
 //!
 //! ```
-//! fn main() {
-//!     let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
-//!     match ircparser::parse(msg) {
-//!         Ok(x) => {
-//!             let line = x;
+//! let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+//! match ircparser::parse(msg) {
+//!     Ok(x) => {
+//!         let line = x;
 //!
-//!             assert_eq!(&line.tags["id"], "123");
-//!             if line.source.is_some() {
-//!                 assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
-//!             }
-//!             assert_eq!(line.command, "PRIVMSG");
-//!             assert_eq!(line.params[0], "#rickastley");
-//!             assert_eq!(line.params[1], "Never gonna give you up!");
+//!         assert_eq!(&line.tags["id"], "123");
+//!         if line.source.is_some() {
+//!             assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
 //!         }
-//!         Err(e) => {
-//!             println!("A parsing error occured: {e}");
-//!             return;
-//!         }
-//!     };
-//! }
+//!         assert_eq!(line.command, "PRIVMSG");
+//!         assert_eq!(line.params[0], "#rickastley");
+//!         assert_eq!(line.params[1], "Never gonna give you up!");
+//!     }
+//!     Err(e) => {
+//!         println!("A parsing error occured: {e}");
+//!         return;
+//!     }
+//! };
 //! ```
 
 mod line;
