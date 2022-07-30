@@ -30,15 +30,54 @@
 
 use std::collections::HashMap;
 
+/// A struct representing a parsed line.
 #[derive(Debug, Clone, Default)]
 pub struct Line {
+    /// This line's tags. This will be an empty hashmap if there are
+    /// none.
     pub tags: HashMap<String, String>,
+    /// This line's source (including the nick, user, and host). This is
+    /// optional, and will be [`None`] if not provided.
     pub source: Option<String>,
+    /// This line's command.
     pub command: String,
+    /// Any parameters passed to the command. This will be an empty
+    /// vector if there are none.
     pub params: Vec<String>,
 }
 
 impl Line {
+    /// Creates a new [`Line`]. You should never call this directly, but
+    /// instead use the [ircparser::parse](super::parse) function.
+    ///
+    /// # Arguments
+    /// - `tags` - This line's tags.
+    /// = `source` - This line's source, or [`None`] if not to be
+    /// provided.
+    /// - `command` - This line's command.
+    /// - `params` - Any parameters passed to the command.
+    ///
+    /// # Returns
+    /// - [`Line`] - The new [`Line`] instance.
+    ///
+    /// # Example
+    /// ```
+    /// use std::collections::HashMap;
+    ///
+    /// let mut tags: HashMap<String, String> = HashMap::new();
+    /// tags.insert("id".to_string(), "123".to_string());
+    ///
+    /// let source = Some(":nick!user@host.tmi.twitch.tv".to_string());
+    /// let command = "PRIVMSG";
+    /// let params = vec!["#rickastley".to_string()];
+    ///
+    /// let line = ircparser::Line::new(tags, source, command, params);
+    ///
+    /// assert_eq!(&line.tags["id"], "123");
+    /// assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
+    /// assert_eq!(line.command, "PRIVMSG");
+    /// assert_eq!(line.params[0], "#rickastley");
+    /// ```
     pub fn new(
         tags: HashMap<String, String>,
         source: Option<String>,

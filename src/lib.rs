@@ -28,6 +28,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! An IRC (RFC1459) parser and formatter, built in Rust.
+//!
+//! ## Parsing messages
+//!
+//! You can parse IRC messages using the provided `parse` function.
+//!
+//! ```
+//! fn main() {
+//!     let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+//!     match ircparser::parse(msg) {
+//!         Ok(x) => {
+//!             let line = x;
+//!
+//!             assert_eq!(&line.tags["id"], "123");
+//!             if line.source.is_some() {
+//!                 assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
+//!             }
+//!             assert_eq!(line.command, "PRIVMSG");
+//!             assert_eq!(line.params[0], "#rickastley");
+//!             assert_eq!(line.params[1], "Never gonna give you up!");
+//!         }
+//!         Err(e) => {
+//!             println!("A parsing error occured: {e}");
+//!             return;
+//!         }
+//!     };
+//! }
+//! ```
+
 mod line;
 
 pub use line::Line;
@@ -35,12 +64,25 @@ use std::collections::HashMap;
 
 type ParseResult<T> = Result<T, ParseError>;
 
+/// Exception thrown when an error occurs during message parsing.
 #[derive(Debug, Clone)]
 pub struct ParseError {
+    /// The details of this error.
     pub details: String,
 }
 
 impl ParseError {
+    /// Generates a new [`ParseError`].
+    ///
+    /// # Arguments
+    /// - `details` - THe details of this error.
+    ///
+    /// # Example
+    /// ```
+    /// let e = ircparser::ParseError::new("err");
+    ///
+    /// assert_eq!(e.details, "err".to_string())
+    /// ```
     pub fn new(details: &str) -> Self {
         Self {
             details: details.into(),
@@ -64,6 +106,35 @@ fn find_index(text: &str, char: char, start: usize) -> Option<usize> {
     None
 }
 
+/// Parses an IRC message.
+///
+/// # Arguments
+/// - `line` - The line you want to parse.
+///
+/// # Returns
+/// - [`Line`] - An instance representing a parsed line.
+///
+/// # Example
+/// ```
+/// let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+/// match ircparser::parse(msg) {
+///     Ok(x) => {
+///         let line = x;
+///
+///         assert_eq!(&line.tags["id"], "123");
+///         if line.source.is_some() {
+///             assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
+///         }
+///         assert_eq!(line.command, "PRIVMSG");
+///         assert_eq!(line.params[0], "#rickastley");
+///         assert_eq!(line.params[1], "Never gonna give you up!");
+///     }
+///     Err(e) => {
+///         println!("A parsing error occured: {e}");
+///         return;
+///     }
+/// };
+/// ```
 pub fn parse(line: &str) -> ParseResult<Line> {
     if line.is_empty() {
         return Err(ParseError::new("line length cannot be 0"));
@@ -142,5 +213,27 @@ mod test_lib {
         );
         assert_eq!(line.command, "PRIVMSG");
         assert_eq!(line.params, vec!["#rickastley", "Never gonna give you up!"]);
+    }
+
+    #[test]
+    fn test_readme_example() {
+        let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+        match parse(msg) {
+            Ok(x) => {
+                let line = x;
+
+                assert_eq!(&line.tags["id"], "123");
+                if line.source.is_some() {
+                    assert_eq!(line.source.unwrap(), ":nick!user@host.tmi.twitch.tv");
+                }
+                assert_eq!(line.command, "PRIVMSG");
+                assert_eq!(line.params[0], "#rickastley");
+                assert_eq!(line.params[1], "Never gonna give you up!");
+            }
+            Err(e) => {
+                println!("A parsing error occured: {e}");
+                return;
+            }
+        };
     }
 }
