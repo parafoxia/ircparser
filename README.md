@@ -2,6 +2,8 @@
 
 An IRC (RFC1459) parser and formatter, built in Rust.
 
+`ircparser` should work on basically any Rust version, but the earliest version checked in the CI is v1.31 (the first version with Rust 2018 support).
+
 ## Setup
 
 To use the latest stable version of `ircparser`, add it to your Cargo.toml file like so:
