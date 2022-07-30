@@ -1,11 +1,21 @@
 [package]
 name = "ircparser"
+description = "An IRC (RFC1459) parser and formatter, built in Rust."
 version = "0.1.0"
 edition = "2021"
+authors = ["Ethan Henderson"]
+readme = "README.md"
+license = "BSD-3-Clause"
+homepage = "https://github.com/parafoxia/ircparser"
+repository = "https://github.com/parafoxia/ircparser"
+documentation = "https://docs.rs/ircparser"
+keywords = ["irc", "rfc", "rfc1459", "parse"]
+categories = ["parser-implementations"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[lib]
+name = "ircparser"
 
 [dev-dependencies]
 collection_macros = "0.2.0"
