@@ -1,6 +1,3 @@
-# "Borrowed" with permission from https://github.com/Jonxslays/piston_rs/blob/master/.github/workflows/ci.yml.
-# Thanks bud!
-
 name: CI
 
 on:
