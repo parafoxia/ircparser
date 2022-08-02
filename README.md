@@ -10,7 +10,7 @@ To use the latest stable version of `ircparser`, add it to your Cargo.toml file 
 
 ```toml
 [dependencies]
-ircparser = "^0.2"
+ircparser = "^0.2.1"
 ```
 
 You can also use the latest development version by specifying the following:
