@@ -35,7 +35,7 @@
 //! You can parse IRC messages using the provided `parse` function.
 //!
 //! ```
-//! let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+//! let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!\r\n";
 //! match ircparser::parse(msg) {
 //!     Ok(mut x) => {
 //!         let line = x.pop_front().unwrap();
@@ -81,6 +81,7 @@ impl ParseError {
     ///
     /// assert_eq!(e.details, "err".to_string())
     /// ```
+    ///
     pub fn new(details: &str) -> Self {
         Self {
             details: details.into(),
@@ -112,11 +113,12 @@ fn find_index(text: &str, char: char, start: usize) -> Option<usize> {
 /// will be a separate element in the return value.
 ///
 /// # Returns
-/// - [`VecDeque<Line>`] - A [`VecDeque`] of all parsed [`Line`]s.
+/// - [`VecDeque<Line>`] - A [`VecDeque`] of all parsed [`Line`]s. This
+/// will be empty if no valid lines were passed and no errors occur.
 ///
 /// # Example
 /// ```
-/// let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+/// let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!\r\n";
 ///
 /// match ircparser::parse(msg) {
 ///     Ok(mut x) => {
@@ -141,12 +143,16 @@ fn find_index(text: &str, char: char, start: usize) -> Option<usize> {
 /// The behaviour of this function changed in v0.2.0. It can now accept
 /// multiple lines at once, but as a consequence, now returns a
 /// [`VecDeque`] of [`Line`] objects instead of a single [`Line`].
+///
 pub fn parse(text: &str) -> ParseResult<VecDeque<Line>> {
     let mut parsed_lines: VecDeque<Line> = VecDeque::new();
 
-    for line in text.replace('\r', "").split('\n') {
+    for line in text.split("\r\n") {
         if line.is_empty() {
-            return Err(ParseError::new("line length cannot be 0"));
+            // If the line length is 0, we can assume the previous line
+            // ended in \r\n, and that this line doesn't need to be
+            // processed.
+            continue;
         }
 
         let mut idx = 0;
@@ -202,9 +208,11 @@ mod test_lib {
 
     #[test]
     fn test_single_partial() {
-        let msg = "PRIVMSG #rickastley :Never gonna give you up!";
+        let msg = "PRIVMSG #rickastley :Never gonna give you up!\r\n";
+
         match parse(msg) {
             Ok(mut x) => {
+                assert_eq!(x.len(), 1);
                 let line = x.pop_front().unwrap();
 
                 assert_eq!(line.tags, HashMap::new());
@@ -214,16 +222,17 @@ mod test_lib {
             }
             Err(e) => {
                 println!("A parsing error occured: {e}");
-                return;
+                assert!(false);
             }
         }
     }
 
     #[test]
     fn test_single_full() {
-        let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+        let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!\r\n";
         match parse(msg) {
             Ok(mut x) => {
+                assert_eq!(x.len(), 1);
                 let line = x.pop_front().unwrap();
 
                 assert_eq!(
@@ -249,9 +258,11 @@ mod test_lib {
 
     #[test]
     fn test_readme_example() {
-        let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!";
+        let msg = "@id=123;name=rick :nick!user@host.tmi.twitch.tv PRIVMSG #rickastley :Never gonna give you up!\r\n";
         match parse(msg) {
             Ok(mut x) => {
+                println!("{x:?}");
+                assert_eq!(x.len(), 1);
                 let line = x.pop_front().unwrap();
 
                 assert_eq!(&line.tags["id"], "123");
@@ -264,14 +275,27 @@ mod test_lib {
             }
             Err(e) => {
                 println!("A parsing error occured: {e}");
-                return;
+                assert!(false);
+            }
+        };
+    }
+
+    #[test]
+    fn test_empty() {
+        match parse("") {
+            Ok(x) => {
+                assert_eq!(x.len(), 0);
+            }
+            Err(e) => {
+                println!("A parsing error occured: {e}");
+                assert!(false);
             }
         };
     }
 
     #[test]
     fn test_multiline() {
-        let msg = "@id=123 PRIVMSG #rickastley :Never gonna give you up!\n@id=456 PRIVMSG #rickastley :Never gonna let you down!";
+        let msg = "@id=123 PRIVMSG #rickastley :Never gonna give you up!\r\n@id=456 PRIVMSG #rickastley :Never gonna let you down!\r\n";
         match parse(msg) {
             Ok(mut x) => {
                 assert_eq!(x.len(), 2);
@@ -287,7 +311,7 @@ mod test_lib {
             }
             Err(e) => {
                 println!("A parsing error occured: {e}");
-                return;
+                assert!(false);
             }
         }
     }

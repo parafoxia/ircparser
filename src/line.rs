@@ -36,11 +36,14 @@ pub struct Line {
     /// This line's tags. This will be an empty hashmap if there are
     /// none.
     pub tags: HashMap<String, String>,
+
     /// This line's source (including the nick, user, and host). This is
     /// optional, and will be [`None`] if not provided.
     pub source: Option<String>,
+
     /// This line's command.
     pub command: String,
+
     /// Any parameters passed to the command. This will be an empty
     /// vector if there are none.
     pub params: Vec<String>,
@@ -78,6 +81,7 @@ impl Line {
     /// assert_eq!(line.command, "PRIVMSG");
     /// assert_eq!(line.params[0], "#rickastley");
     /// ```
+    ///
     pub fn new(
         tags: HashMap<String, String>,
         source: Option<String>,
