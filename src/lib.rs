@@ -144,7 +144,7 @@ fn find_index(text: &str, char: char, start: usize) -> Option<usize> {
 pub fn parse(text: &str) -> ParseResult<VecDeque<Line>> {
     let mut parsed_lines: VecDeque<Line> = VecDeque::new();
 
-    for line in text.replace("\r", "").split("\n") {
+    for line in text.replace('\r', "").split('\n') {
         if line.is_empty() {
             return Err(ParseError::new("line length cannot be 0"));
         }
