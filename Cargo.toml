@@ -1,7 +1,7 @@
 [package]
 name = "ircparser"
 description = "An IRC (RFC1459) parser and formatter, built in Rust."
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Ethan Henderson"]
 readme = "README.md"
