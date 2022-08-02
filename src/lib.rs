@@ -73,7 +73,7 @@ impl ParseError {
     /// Generates a new [`ParseError`].
     ///
     /// # Arguments
-    /// - `details` - THe details of this error.
+    /// - `details` - The details of this error.
     ///
     /// # Example
     /// ```
